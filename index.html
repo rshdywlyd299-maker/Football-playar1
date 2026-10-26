@@ -1,0 +1,787 @@
+# Football-playar1
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚽ 100 أسطورة كرة قدم - قصص ملهمة</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-1: #0d1117; --bg-2: #161b22;
+    --card: linear-gradient(145deg, #1e2749, #2a3a66);
+    --accent: #e94560; --accent-2: #ffd700;
+    --text: #e6edf3; --muted: #8b949e;
+    --border: rgba(233,69,96,.25); --shadow: rgba(0,0,0,.4);
+  }
+  [data-theme="light"] {
+    --bg-1: #f5f7fa; --bg-2: #ffffff;
+    --card: linear-gradient(145deg,#fff,#eef2f7);
+    --text: #1a1a2e; --muted: #5a6270;
+    --border: rgba(233,69,96,.35); --shadow: rgba(0,0,0,.12);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Cairo',sans-serif; }
+  html { scroll-behavior:smooth; }
+  body {
+    background: radial-gradient(circle at 20% 0%, var(--bg-2) 0%, var(--bg-1) 50%);
+    color: var(--text); min-height:100vh; overflow-x:hidden;
+    transition: background .4s, color .4s;
+  }
+  #progressBar {
+    position:fixed; top:0; left:0; height:4px;
+    background:linear-gradient(90deg,var(--accent),var(--accent-2));
+    width:0%; z-index:9999; transition:width .1s;
+  }
+  .floating-actions {
+    position:fixed; top:20px; left:20px; z-index:900;
+    display:flex; flex-direction:column; gap:10px;
+  }
+  .fab {
+    width:48px; height:48px; border-radius:50%;
+    background:var(--accent); color:#fff; border:none;
+    font-size:1.3rem; cursor:pointer;
+    box-shadow:0 6px 20px rgba(233,69,96,.5);
+    transition:.3s; display:flex; align-items:center; justify-content:center;
+  }
+  .fab:hover { transform:scale(1.1) rotate(5deg); }
+  .fab.secondary { background:var(--accent-2); color:#1a1a2e; }
+  header {
+    position:relative; padding:70px 20px 50px; text-align:center;
+    background:linear-gradient(135deg,#0f3460 0%,#1a1a2e 100%);
+    border-bottom:4px solid var(--accent); overflow:hidden;
+  }
+  [data-theme="light"] header { background:linear-gradient(135deg,#16537e 0%,#2a3a66 100%); }
+  header::before {
+    content:'⚽'; position:absolute; font-size:22rem; opacity:.04;
+    top:-60px; left:50%; transform:translateX(-50%) rotate(-15deg);
+    animation:spin 30s linear infinite; pointer-events:none;
+  }
+  @keyframes spin { to { transform:translateX(-50%) rotate(345deg); } }
+  header h1 {
+    font-size:3rem; font-weight:900; margin-bottom:10px;
+    background:linear-gradient(90deg,#fff,var(--accent),#fff);
+    background-size:200% auto; -webkit-background-clip:text;
+    background-clip:text; -webkit-text-fill-color:transparent;
+    animation:shine 4s linear infinite; position:relative; z-index:1;
+  }
+  @keyframes shine { to { background-position:200% center; } }
+  header p { color:#ccc; font-size:1.1rem; position:relative; z-index:1; }
+  .stats {
+    display:flex; justify-content:center; gap:20px; flex-wrap:wrap;
+    margin-top:25px; position:relative; z-index:1;
+  }
+  .stat {
+    text-align:center; padding:10px 22px;
+    background:rgba(233,69,96,.15); border:1px solid rgba(233,69,96,.35);
+    border-radius:14px; backdrop-filter:blur(6px); transition:.3s; min-width:90px;
+  }
+  .stat:hover { transform:translateY(-4px); border-color:var(--accent); }
+  .stat .num { font-size:1.6rem; font-weight:900; color:var(--accent-2); display:block; }
+  .stat .label { font-size:.78rem; color:#ddd; }
+  .controls {
+    padding:25px 20px 12px; position:sticky; top:0; z-index:100;
+    background:linear-gradient(180deg,var(--bg-1) 82%,transparent);
+  }
+  .controls-inner {
+    max-width:1200px; margin:0 auto; display:flex; flex-wrap:wrap;
+    gap:12px; align-items:center; justify-content:center;
+  }
+  .search-wrap { position:relative; flex:1 1 320px; max-width:480px; }
+  .search-wrap input {
+    width:100%; padding:14px 48px 14px 22px; border-radius:50px;
+    border:2px solid var(--accent); background:var(--bg-2); color:var(--text);
+    font-size:.95rem; outline:none; transition:.3s; font-family:inherit;
+  }
+  .search-wrap input:focus {
+    box-shadow:0 0 22px rgba(233,69,96,.5); border-color:var(--accent-2);
+  }
+  .search-wrap .icon {
+    position:absolute; left:18px; top:50%; transform:translateY(-50%);
+    font-size:1.1rem; color:var(--accent);
+  }
+  .search-wrap .clear-btn {
+    position:absolute; right:14px; top:50%; transform:translateY(-50%);
+    background:none; border:none; color:var(--muted); font-size:1.2rem;
+    cursor:pointer; display:none; width:24px; height:24px;
+    align-items:center; justify-content:center;
+  }
+  .search-wrap .clear-btn.show { display:flex; }
+  .filter-group { display:flex; gap:8px; flex-wrap:wrap; }
+  .filter-chip {
+    padding:10px 16px; border-radius:50px; border:1px solid var(--border);
+    background:var(--bg-2); color:var(--text); font-size:.85rem;
+    cursor:pointer; transition:.25s; font-family:inherit;
+    display:flex; align-items:center; gap:6px; white-space:nowrap;
+  }
+  .filter-chip:hover { border-color:var(--accent); transform:translateY(-2px); }
+  .filter-chip.active {
+    background:var(--accent); border-color:var(--accent); color:#fff;
+    box-shadow:0 4px 15px rgba(233,69,96,.4);
+  }
+  .filter-chip.fav.active { background:var(--accent-2); color:#1a1a2e; border-color:var(--accent-2); }
+  select.filter-chip {
+    appearance:none; padding-left:30px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%238b949e' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:left 14px center;
+  }
+  .results-bar {
+    max-width:1200px; margin:0 auto; padding:0 20px 15px;
+    display:flex; justify-content:space-between; align-items:center;
+    flex-wrap:wrap; gap:10px; color:var(--muted); font-size:.9rem;
+  }
+  .results-bar strong { color:var(--accent); }
+  .results-bar .reset-btn {
+    background:none; border:1px solid var(--border); color:var(--text);
+    padding:6px 14px; border-radius:50px; cursor:pointer;
+    font-family:inherit; font-size:.8rem; transition:.3s; display:none;
+  }
+  .results-bar .reset-btn.show { display:inline-block; }
+  .results-bar .reset-btn:hover { border-color:var(--accent); color:var(--accent); }
+  .container { max-width:1300px; margin:0 auto; padding:0 20px; }
+  .players-grid {
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
+    gap:22px; padding:20px 0 60px;
+  }
+  .player-card {
+    background:var(--card); border-radius:16px; overflow:hidden;
+    cursor:pointer; transition:.4s cubic-bezier(.175,.885,.32,1.275);
+    box-shadow:0 8px 25px var(--shadow); border:1px solid var(--border);
+    position:relative; opacity:0; transform:translateY(25px);
+    animation:fadeUp .5s forwards;
+  }
+  @keyframes fadeUp { to { opacity:1; transform:translateY(0); } }
+  .player-card:hover {
+    transform:translateY(-6px) scale(1.02);
+    box-shadow:0 16px 35px rgba(233,69,96,.35); border-color:var(--accent);
+  }
+  .player-card .flag-badge {
+    position:absolute; top:12px; right:12px;
+    background:rgba(0,0,0,.7); backdrop-filter:blur(6px);
+    padding:4px 10px; border-radius:50px; font-size:1rem;
+    border:1px solid rgba(255,255,255,.2); z-index:2;
+  }
+  .player-card .fav-btn {
+    position:absolute; top:12px; left:12px;
+    width:34px; height:34px; border-radius:50%;
+    background:rgba(0,0,0,.6); backdrop-filter:blur(6px);
+    border:1px solid rgba(255,255,255,.2); color:#fff;
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
+    font-size:1rem; z-index:3; transition:.3s;
+  }
+  .player-card .fav-btn:hover { transform:scale(1.15); }
+  .player-card .fav-btn.active {
+    background:var(--accent-2); color:#1a1a2e; border-color:var(--accent-2);
+  }
+  .player-card .img-wrap {
+    height:220px; overflow:hidden; position:relative; background:var(--bg-2);
+  }
+  .player-card img {
+    width:100%; height:100%; object-fit:cover; transition:transform .5s;
+  }
+  .player-card:hover img { transform:scale(1.1); }
+  .player-card .img-wrap::after {
+    content:''; position:absolute; inset:0;
+    background:linear-gradient(to top, rgba(30,39,73,.95), transparent 60%);
+    pointer-events:none;
+  }
+  [data-theme="light"] .player-card .img-wrap::after {
+    background:linear-gradient(to top, rgba(255,255,255,.9), transparent 60%);
+  }
+  .player-card .card-info { padding:14px 16px; position:relative; }
+  .player-card h3 {
+    color:var(--accent); font-size:1.15rem; margin-bottom:5px; font-weight:700;
+  }
+  .player-card .position {
+    color:var(--accent-2); font-size:.82rem; margin-bottom:3px;
+  }
+  .player-card .details {
+    display:flex; gap:12px; color:var(--muted); font-size:.78rem;
+    margin-top:8px; padding-top:10px;
+    border-top:1px solid rgba(255,255,255,.08);
+  }
+  [data-theme="light"] .player-card .details {
+    border-top-color:rgba(0,0,0,.08);
+  }
+  .no-results {
+    grid-column:1/-1; text-align:center; padding:60px 20px;
+    color:var(--accent); font-size:1.3rem;
+  }
+  .no-results span { font-size:4rem; display:block; margin-bottom:15px; }
+  .loader {
+    grid-column:1/-1; text-align:center; padding:60px 20px;
+    color:var(--muted); font-size:1.1rem;
+  }
+  .loader .spinner {
+    width:50px; height:50px; border:4px solid var(--border);
+    border-top-color:var(--accent); border-radius:50%;
+    margin:0 auto 15px; animation:spin2 1s linear infinite;
+  }
+  @keyframes spin2 { to { transform:rotate(360deg); } }
+  .modal {
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,.88);
+    backdrop-filter:blur(8px); z-index:1000;
+    justify-content:center; align-items:center; padding:20px; overflow-y:auto;
+  }
+  .modal.active { display:flex; }
+  .modal-content {
+    background:var(--card); padding:30px; border-radius:22px;
+    max-width:700px; width:100%; position:relative;
+    border:2px solid var(--accent); animation:modalIn .4s ease;
+    max-height:92vh; overflow-y:auto;
+  }
+  .modal-content::-webkit-scrollbar { width:8px; }
+  .modal-content::-webkit-scrollbar-track { background:rgba(0,0,0,.3); border-radius:10px; }
+  .modal-content::-webkit-scrollbar-thumb { background:var(--accent); border-radius:10px; }
+  @keyframes modalIn {
+    from { transform:translateY(-50px) scale(.9); opacity:0; }
+    to { transform:translateY(0) scale(1); opacity:1; }
+  }
+  .close-btn {
+    position:absolute; top:12px; left:16px; font-size:1.8rem;
+    color:var(--accent); cursor:pointer; transition:.3s;
+    width:38px; height:38px; display:flex; align-items:center; justify-content:center;
+    border-radius:50%; background:rgba(0,0,0,.3); line-height:1; z-index:5;
+  }
+  .close-btn:hover { color:#fff; background:var(--accent); transform:rotate(90deg); }
+  .modal-content .hero-img {
+    width:150px; height:150px; border-radius:50%; object-fit:cover;
+    display:block; margin:0 auto 18px; border:4px solid var(--accent);
+    box-shadow:0 0 35px rgba(233,69,96,.5); background:var(--bg-2);
+  }
+  .modal-content h2 {
+    text-align:center; color:var(--accent); font-size:1.8rem;
+    margin-bottom:8px; font-weight:900;
+  }
+  .modal-tags {
+    display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin-bottom:18px;
+  }
+  .modal-tags span {
+    background:rgba(255,215,0,.12); color:var(--accent-2);
+    padding:5px 14px; border-radius:50px; font-size:.8rem;
+    border:1px solid rgba(255,215,0,.3);
+  }
+  .modal-story {
+    color:var(--text); line-height:1.9; font-size:1rem; text-align:justify;
+    padding:18px; background:rgba(0,0,0,.15); border-radius:14px;
+    border-right:4px solid var(--accent);
+  }
+  [data-theme="light"] .modal-story { background:rgba(0,0,0,.05); }
+  #toTop {
+    position:fixed; bottom:25px; left:25px; width:50px; height:50px;
+    border-radius:50%; background:var(--accent); color:#fff; border:none;
+    font-size:1.4rem; cursor:pointer; display:none; z-index:500;
+    box-shadow:0 6px 20px rgba(233,69,96,.5); transition:.3s;
+  }
+  #toTop:hover { transform:translateY(-5px) scale(1.1); }
+  #toTop.show { display:block; animation:fadeUp .4s; }
+  footer {
+    background:#0a0e14; text-align:center; padding:25px;
+    color:var(--muted); border-top:3px solid var(--accent); font-size:.9rem;
+  }
+  [data-theme="light"] footer { background:#e5e9f0; }
+  footer .heart { color:var(--accent); }
+  @media (max-width:600px) {
+    header { padding:60px 15px 45px; }
+    header h1 { font-size:2rem; }
+    header::before { font-size:14rem; }
+    .stats { gap:12px; }
+    .stat { padding:8px 14px; min-width:75px; }
+    .stat .num { font-size:1.3rem; }
+    .controls { padding:18px 12px 8px; }
+    .filter-chip { padding:8px 12px; font-size:.78rem; }
+    .modal-content { padding:20px 15px; }
+    .modal-content .hero-img { width:120px; height:120px; }
+    .modal-content h2 { font-size:1.4rem; }
+    .modal-story { padding:12px; font-size:.95rem; }
+    #toTop { bottom:15px; left:15px; width:45px; height:45px; }
+    .floating-actions { top:12px; left:12px; }
+    .fab { width:42px; height:42px; font-size:1.1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progressBar"></div>
+
+<div class="floating-actions">
+  <button class="fab" id="themeBtn" title="تبديل الوضع">🌙</button>
+  <button class="fab secondary" id="randomBtn" title="لاعب عشوائي">🎲</button>
+</div>
+
+<header>
+  <h1>⚽ 100 أسطورة كرة قدم</h1>
+  <p>قصص حياة أشهر لاعبي كرة القدم في العالم</p>
+  <div class="stats">
+    <div class="stat"><span class="num" id="statPlayers">0</span><span class="label">لاعب</span></div>
+    <div class="stat"><span class="num" id="statCountries">0</span><span class="label">دولة</span></div>
+    <div class="stat"><span class="num" id="statShowing">0</span><span class="label">معروض</span></div>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="controls-inner">
+    <div class="search-wrap">
+      <span class="icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="ابحث بالاسم، الدولة، المركز، أو النادي..." autocomplete="off">
+      <button class="clear-btn" id="clearSearch">✕</button>
+    </div>
+    <div class="filter-group">
+      <button class="filter-chip fav" id="favFilter">❤️ المفضلة</button>
+      <select class="filter-chip" id="countryFilter">
+        <option value="">🌍 كل الدول</option>
+      </select>
+      <select class="filter-chip" id="positionFilter">
+        <option value="">⚽ كل المراكز</option>
+        <option value="مهاجم">مهاجم</option>
+        <option value="وسط">وسط</option>
+        <option value="مدافع">مدافع</option>
+        <option value="حارس">حارس</option>
+      </select>
+      <select class="filter-chip" id="sortFilter">
+        <option value="default">⇅ ترتيب افتراضي</option>
+        <option value="name-asc">الاسم (أ-ي)</option>
+        <option value="name-desc">الاسم (ي-أ)</option>
+        <option value="year-asc">الأقدم أولاً</option>
+        <option value="year-desc">الأحدث أولاً</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<div class="results-bar">
+  <span>عرض <strong id="countShown">0</strong> لاعب</span>
+  <button class="reset-btn" id="resetBtn">↺ إعادة تعيين</button>
+</div>
+
+<main class="container">
+  <div class="players-grid" id="playersGrid"></div>
+</main>
+
+<div class="modal" id="playerModal">
+  <div class="modal-content">
+    <span class="close-btn" id="closeModal">&times;</span>
+    <img class="hero-img" id="modalImage" src="" alt="">
+    <h2 id="modalName"></h2>
+    <div class="modal-tags" id="modalTags"></div>
+    <div class="modal-story" id="modalStory"></div>
+  </div>
+</div>
+
+<button id="toTop" title="العودة لأعلى">↑</button>
+
+<footer>
+  <p>© 2024 أساطير كرة القدم — صُنع بـ <span class="heart">❤</span> لعشاق الساحرة المستديرة</p>
+</footer>
+
+<script>
+/* ===== صور احتياطية أنيقة ===== */
+const FALLBACK = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="240" viewBox="0 0 600 240"><rect fill="%231e2749" width="600" height="240"/><text x="50%" y="50%" font-family="Arial" font-size="60" fill="%23e94560" text-anchor="middle" dy=".3em">⚽</text></svg>';
+
+/* ===== كاش الصور ===== */
+const imageCache = {};
+const FAV_KEY = 'football_favs';
+const THEME_KEY = 'football_theme';
+
+/* ===== جلب صورة اللاعب من TheSportsDB ===== */
+async function fetchPlayerImage(playerName) {
+  const key = playerName.toLowerCase();
+  if (imageCache[key] !== undefined) return imageCache[key];
+
+  try {
+    const searchName = playerName.split(' ')[0];
+    const res = await fetch(`https://www.thesportsdb.com/api/v1/json/3/searchplayers.php?p=${encodeURIComponent(searchName)}`);
+    const data = await res.json();
+    if (data.player && data.player.length > 0) {
+      const exact = data.player.find(p =>
+        p.strPlayer && p.strPlayer.toLowerCase().includes(playerName.split(' ')[0].toLowerCase())
+      );
+      const target = exact || data.player[0];
+      const url = target.strThumb || target.strCutout || target.strRender || null;
+      imageCache[key] = url;
+      return url;
+    }
+  } catch (e) {
+    console.warn('فشل جلب صورة:', playerName);
+  }
+  imageCache[key] = null;
+  return null;
+}
+
+/* ===== بيانات 100 لاعب ===== */
+const players = [
+  { name:"ليونيل ميسي", country:"الأرجنتين", flag:"🇦🇷", position:"مهاجم", born:"1987", clubs:"برشلونة، باريس، إنتر ميامي", story:"وُلد في روزاريو بالأرجنتين. عانى من نقص هرمون النمو في طفولته، فسافر إلى إسبانيا وعمره 13 عاماً للانضمام إلى برشلونة الذي تكفّل بعلاجه. تطوّر في لا ماسيا ليصبح أحد أفضل اللاعبين في التاريخ. فاز بـ 8 كرات ذهبية، و4 دوري أبطال أوروبا، وقاد الأرجنتين للفوز بكأس العالم 2022." },
+  { name:"كريستيانو رونالدو", country:"البرتغال", flag:"🇵🇹", position:"مهاجم", born:"1985", clubs:"مانشستر، ريال مدريد، يوفنتوس، النصر", story:"وُلد في ماديرا لعائلة فقيرة. بدأ في سبورتنغ لشبونة، ثم مانشستر يونايتد حيث أصبح نجماً عالمياً. انتقل إلى ريال مدريد ليصبح أسطورة النادي وهدّافه التاريخي. فاز بـ 5 كرات ذهبية و5 دوري أبطال أوروبا، وقاد البرتغال للفوز بيورو 2016." },
+  { name:"بيليه", country:"البرازيل", flag:"🇧🇷", position:"مهاجم", born:"1940", clubs:"سانتوس، نيويورك كوزموس", story:"الأسطورة البرازيلية الوحيدة التي فازت بثلاث كؤوس عالم (1958، 1962، 1970). سجّل أكثر من 1000 هدف في مسيرته. بدأ من الفقر في ساو باولو ليصبح رمزاً عالمياً لكرة القدم." },
+  { name:"دييغو مارادونا", country:"الأرجنتين", flag:"🇦🇷", position:"مهاجم", born:"1960", clubs:"بوكا جونيورز، برشلونة، نابولي", story:"قاد الأرجنتين للفوز بكأس العالم 1986 بأداء أسطوري، بما في ذلك 'هدف القرن' ضد إنجلترا. غيّر وجه نابولي بقيادته للفوز بالدوري الإيطالي مرتين." },
+  { name:"يوهان كرويف", country:"هولندا", flag:"🇳🇱", position:"مهاجم", born:"1947", clubs:"أياكس، برشلونة", story:"صاحب فلسفة 'الكرة الشاملة' التي غيّرت كرة القدم. قاد أياكس وبرشلونة للعديد من الألقاب. فاز بالكرة الذهبية 3 مرات." },
+  { name:"زين الدين زيدان", country:"فرنسا", flag:"🇫🇷", position:"وسط", born:"1972", clubs:"يوفنتوس، ريال مدريد", story:"قاد فرنسا للفوز بكأس العالم 1998 ويورو 2000. سجّل هدفين في نهائي 1998. فاز بالكرة الذهبية 1998." },
+  { name:"فرانز بيكنباور", country:"ألمانيا", flag:"🇩🇪", position:"مدافع", born:"1945", clubs:"بايرن ميونخ، نيويورك كوزموس", story:"'القيصر' الألماني. فاز بكأس العالم كلاعب (1974) وكمدرب (1990). قاد بايرن ميونخ لثلاثة ألقاب أوروبية متتالية." },
+  { name:"ألفريدو دي ستيفانو", country:"الأرجنتين/إسبانيا", flag:"🇦🇷", position:"مهاجم", born:"1926", clubs:"ريال مدريد، إسبانيول", story:"قاد ريال مدريد للفوز بأول 5 كؤوس أوروبية متتالية. فاز بالكرة الذهبية 1957 و1959." },
+  { name:"رونالدو نازاريو", country:"البرازيل", flag:"🇧🇷", position:"مهاجم", born:"1976", clubs:"برشلونة، إنتر، ريال مدريد، ميلان", story:"'الظاهرة' البرازيلية. فاز بالكرة الذهبية مرتين (1997، 2002). سجّل 15 هدفاً في كؤوس العالم. قاد البرازيل للفوز بكأس العالم 2002." },
+  { name:"رونالدينيو", country:"البرازيل", flag:"🇧🇷", position:"مهاجم", born:"1980", clubs:"برشلونة، ميلان", story:"صاحب الابتسامة الساحرة والمهارات المذهلة. فاز بالكرة الذهبية 2005 ودوري أبطال أوروبا 2006 وكأس العالم 2002." },
+  { name:"ميشيل بلاتيني", country:"فرنسا", flag:"🇫🇷", position:"وسط", born:"1955", clubs:"نانسي، سانت إتيان، يوفنتوس", story:"فاز بالكرة الذهبية 3 مرات متتالية (1983-1985). قاد فرنسا للفوز بيورو 1984. أسطورة يوفنتوس." },
+  { name:"فيرينك بوشكاش", country:"المجر", flag:"🇭🇺", position:"مهاجم", born:"1927", clubs:"هونفيد، ريال مدريد", story:"أسطورة الكرة المجرية. قاد المنتخب المجري الذهبي في الخمسينيات. سجّل أكثر من 700 هدف في مسيرته." },
+  { name:"جورج بست", country:"أيرلندا الشمالية", flag:"🇬🇧", position:"وسط", born:"1946", clubs:"مانشستر يونايتد", story:"موهبة استثنائية في مانشستر يونايتد. فاز بالكرة الذهبية 1968. قاد يونايتد للفوز بأول دوري أبطال أوروبا." },
+  { name:"لوثار ماتيوس", country:"ألمانيا", flag:"🇩🇪", position:"وسط", born:"1961", clubs:"بايرن ميونخ، إنتر", story:"قاد ألمانيا للفوز بكأس العالم 1990. فاز بالكرة الذهبية 1990. لعب أكثر من 150 مباراة دولية." },
+  { name:"ماركو فان باستن", country:"هولندا", flag:"🇳🇱", position:"مهاجم", born:"1964", clubs:"أياكس، ميلان", story:"أسطورة ميلان الهولندية. فاز بالكرة الذهبية 3 مرات (1988، 1989، 1992). قاد هولندا للفوز بيورو 1988." },
+  { name:"رود خوليت", country:"هولندا", flag:"🇳🇱", position:"مهاجم", born:"1962", clubs:"فينورد، ميلان", story:"جزء من الثلاثي الهولندي الأسطوري في ميلان. فاز بالكرة الذهبية 1987. قاد هولندا للفوز بيورو 1988." },
+  { name:"روبرتو باجيو", country:"إيطاليا", flag:"🇮🇹", position:"مهاجم", born:"1967", clubs:"فيورنتينا، يوفنتوس، ميلان", story:"'الذيل الحصان الإلهي'. فاز بالكرة الذهبية 1993. قاد إيطاليا لنهائي كأس العالم 1994." },
+  { name:"باولو مالديني", country:"إيطاليا", flag:"🇮🇹", position:"مدافع", born:"1968", clubs:"ميلان", story:"أسطورة ميلان. لعب 25 عاماً مع النادي. فاز بـ 5 دوري أبطال أوروبا و7 دوري إيطالي." },
+  { name:"ليف ياشين", country:"الاتحاد السوفيتي", flag:"🇷🇺", position:"حارس", born:"1929", clubs:"دينامو موسكو", story:"'العنكبوت الأسود'. الحارس الوحيد الذي فاز بالكرة الذهبية (1963). قاد الاتحاد السوفيتي للفوز بيورو 1960." },
+  { name:"أوزيبيو", country:"البرتغال", flag:"🇵🇹", position:"مهاجم", born:"1942", clubs:"بنفيكا", story:"'النمر الأسود'. قاد البرتغال للمركز الثالث في كأس العالم 1966. فاز بالكرة الذهبية 1965." },
+  { name:"محمد صلاح", country:"مصر", flag:"🇪🇬", position:"مهاجم", born:"1992", clubs:"المقاولون، بازل، روما، ليفربول", story:"وُلد في قرية نجريج بمحافظة الغربية. بدأ في المقاولون العرب، ثم بازل. في 2017 انتقل إلى ليفربول ليصبح أسطورة النادي وهدّافه التاريخي في الدوري الإنجليزي. فاز بدوري أبطال أوروبا 2019 والدوري الإنجليزي 2020." },
+  { name:"نيمار جونيور", country:"البرازيل", flag:"🇧🇷", position:"مهاجم", born:"1992", clubs:"سانتوس، برشلونة، باريس، الهلال", story:"بدأ في سانتوس وأصبح نجماً صاعداً. انتقل لبرشلونة 2013 حيث شكّل ثلاثياً مع ميسي وسواريز. انتقل لباريس 2017 بصفقة قياسية (222 مليون يورو)." },
+  { name:"كيليان مبابي", country:"فرنسا", flag:"🇫🇷", position:"مهاجم", born:"1998", clubs:"موناكو، باريس، ريال مدريد", story:"بدأ في موناكو وسرعان ما لفت الأنظار بسرعته الخارقة. قاد فرنسا للفوز بكأس العالم 2018 وهو بعمر 19 عاماً، وسجّل هاتريك في نهائي 2022. انتقل لريال مدريد 2024." },
+  { name:"لوكا مودريتش", country:"كرواتيا", flag:"🇭🇷", position:"وسط", born:"1985", clubs:"دينامو زغرب، توتنهام، ريال مدريد", story:"قاد كرواتيا لنهائي كأس العالم 2018 حيث فاز بالكرة الذهبية. فاز بالكرة الذهبية 2018 كأول لاعب يكسر هيمنة ميسي ورونالدو منذ 2008." },
+  { name:"كيفن دي بروين", country:"بلجيكا", flag:"🇧🇪", position:"وسط", born:"1991", clubs:"تشيلسي، فولفسبورغ، مانشستر سيتي", story:"أحد أفضل صنّاع الألعاب في جيله. فاز بالدوري الإنجليزي 6 مرات مع مانشستر سيتي ودوري أبطال أوروبا 2023." },
+  { name:"كريم بنزيما", country:"فرنسا", flag:"🇫🇷", position:"مهاجم", born:"1987", clubs:"ليون، ريال مدريد، الاتحاد", story:"فاز بالكرة الذهبية 2022 بعد موسم استثنائي مع ريال مدريد. فاز بـ 5 دوري أبطال أوروبا. انتقل للاتحاد السعودي 2023." },
+  { name:"روبرت ليفاندوفسكي", country:"بولندا", flag:"🇵🇱", position:"مهاجم", born:"1988", clubs:"دورتموند، بايرن ميونخ، برشلونة", story:"أحد أفضل المهاجمين في جيله. سجّل 41 هدفاً في موسم واحد بالبوندسليغا. فاز بالدوري الألماني 8 مرات ودوري أبطال أوروبا 2020." },
+  { name:"فيرجيل فان دايك", country:"هولندا", flag:"🇳🇱", position:"مدافع", born:"1991", clubs:"سيلتيك، ساوثهامبتون، ليفربول", story:"أحد أفضل المدافعين في جيله. قاد ليفربول للفوز بدوري أبطال أوروبا 2019 والدوري الإنجليزي 2020. وصل للمركز الثاني في الكرة الذهبية 2019." },
+  { name:"تيبو كورتوا", country:"بلجيكا", flag:"🇧🇪", position:"حارس", born:"1992", clubs:"تشيلسي، ريال مدريد", story:"أحد أفضل الحراس في العالم. فاز بدوري أبطال أوروبا 2022 مع ريال مدريد حيث قدّم أداءً أسطورياً في النهائي." },
+  { name:"مانويل نوير", country:"ألمانيا", flag:"🇩🇪", position:"حارس", born:"1986", clubs:"شالكه، بايرن ميونخ", story:"غيّر مفهوم حراسة المرمى بدوره كـ'حارس متقدم'. فاز بكأس العالم 2014 مع ألمانيا. فاز بدوري أبطال أوروبا مرتين مع بايرن." },
+  { name:"سيرجيو راموس", country:"إسبانيا", flag:"🇪🇸", position:"مدافع", born:"1986", clubs:"إشبيلية، ريال مدريد، باريس", story:"أسطورة ريال مدريد. فاز بـ 4 دوري أبطال أوروبا و5 دوري إسباني. قاد إسبانيا للفوز بكأس العالم 2010 ويورو 2008 و2012." },
+  { name:"أندريس إنييستا", country:"إسبانيا", flag:"🇪🇸", position:"وسط", born:"1984", clubs:"برشلونة", story:"سجّل هدف الفوز في نهائي كأس العالم 2010. أسطورة برشلونة مع 4 دوري أبطال و9 دوري إسباني." },
+  { name:"تشافي هيرنانديز", country:"إسبانيا", flag:"🇪🇸", position:"وسط", born:"1980", clubs:"برشلونة", story:"عقل برشلونة وقلب تيكي تاكا. فاز بـ 4 دوري أبطال و8 دوري إسباني. قاد إسبانيا للفوز بكأس العالم 2010 ويورو 2008 و2012." },
+  { name:"إيكر كاسياس", country:"إسبانيا", flag:"🇪🇸", position:"حارس", born:"1981", clubs:"ريال مدريد، بورتو", story:"'القديس'. قاد إسبانيا للفوز بكأس العالم 2010 ويورو 2008 و2012. فاز بـ 3 دوري أبطال أوروبا مع ريال مدريد." },
+  { name:"كارليس بويول", country:"إسبانيا", flag:"🇪🇸", position:"مدافع", born:"1978", clubs:"برشلونة", story:"قلب دفاع برشلونة وإسبانيا. فاز بـ 3 دوري أبطال و6 دوري إسباني. قاد إسبانيا للفوز بكأس العالم 2010 ويورو 2008." },
+  { name:"جيرارد بيكيه", country:"إسبانيا", flag:"🇪🇸", position:"مدافع", born:"1987", clubs:"برشلونة", story:"فاز بـ 3 دوري أبطال و9 دوري إسباني مع برشلونة. فاز بكأس العالم 2010 مع إسبانيا. اعتزل 2022." },
+  { name:"لويس سواريز", country:"أوروغواي", flag:"🇺🇾", position:"مهاجم", born:"1987", clubs:"أياكس، ليفربول، برشلونة، أتلتيكو", story:"أحد أفضل المهاجمين في جيله. شكّل ثلاثياً مرعباً مع ميسي ونيمار في برشلونة. فاز بدوري أبطال أوروبا 2015. فاز بالحذاء الذهبي الأوروبي مرتين." },
+  { name:"سيرجيو أغويرو", country:"الأرجنتين", flag:"🇦🇷", position:"مهاجم", born:"1988", clubs:"أتلتيكو مدريد، مانشستر سيتي، برشلونة", story:"أسطورة مانشستر سيتي وهدّافه التاريخي. سجّل هدفاً تاريخياً في الدقيقة 94 ضد QPR ليفوز سيتي بالدوري 2012." },
+  { name:"إدين هازارد", country:"بلجيكا", flag:"🇧🇪", position:"مهاجم", born:"1991", clubs:"ليل، تشيلسي، ريال مدريد", story:"أحد أفضل لاعبي جيله في ذروته. فاز بالدوري الإنجليزي مرتين مع تشيلسي. قاد بلجيكا للمركز الثالث في كأس العالم 2018." },
+  { name:"محمد أبو تريكة", country:"مصر", flag:"🇪🇬", position:"وسط", born:"1978", clubs:"الأهلي", story:"أسطورة الأهلي والكرة المصرية. فاز بدوري أبطال أفريقيا 4 مرات. قاد مصر للفوز بكأس أمم أفريقيا 2006 و2008 و2010." },
+  { name:"سامي الجابر", country:"السعودية", flag:"🇸🇦", position:"مهاجم", born:"1972", clubs:"الهلال، وولفرهامبتون", story:"أسطورة الهلال والكرة السعودية. قاد السعودية للتأهل لكأس العالم 4 مرات. سجّل في كأس العالم 1994 و2006." },
+  { name:"ماجد عبد الله", country:"السعودية", flag:"🇸🇦", position:"مهاجم", born:"1959", clubs:"النصر", story:"'أسطورة العرب'. هدّاف المنتخب السعودي التاريخي. قاد السعودية للفوز بكأس آسيا 1984 و1988." },
+  { name:"صادق سعد", country:"العراق", flag:"🇮🇶", position:"مهاجم", born:"1968", clubs:"الزوراء، الاتحاد", story:"أسطورة الكرة العراقية. قاد العراق للفوز بكأس آسيا 2007. هدّاف المنتخب العراقي التاريخي." },
+  { name:"رابح ماجر", country:"الجزائر", flag:"🇩🇿", position:"مهاجم", born:"1958", clubs:"الجزائر، بورتو", story:"أسطورة الكرة الجزائرية. سجّل هدفاً تاريخياً ضد ألمانيا في كأس العالم 1982. فاز بدوري أبطال أوروبا 1987 مع بورتو." },
+  { name:"مهدي مهدوي‌كيا", country:"إيران", flag:"🇮🇷", position:"وسط", born:"1977", clubs:"هامبورغ، بايرن ميونخ", story:"أحد أفضل اللاعبين الآسيويين في تاريخ أوروبا. لعب لهامبورغ وبايرن ميونخ. يُعتبر رمزاً للكرة الإيرانية في أوروبا." },
+  { name:"علي دائي", country:"إيران", flag:"🇮🇷", position:"مهاجم", born:"1969", clubs:"بايرن ميونخ، هيرتا برلين", story:"هدّاف المنتخب الإيراني التاريخي وأحد أفضل الهدّافين الدوليين في التاريخ. لعب لبايرن ميونخ." },
+  { name:"سون هيونغ مين", country:"كوريا الجنوبية", flag:"🇰🇷", position:"مهاجم", born:"1992", clubs:"هامبورغ، باير ليفركوزن، توتنهام", story:"أحد أفضل اللاعبين الآسيويين في التاريخ. فاز بالحذاء الذهبي للدوري الإنجليزي 2022. قاد كوريا الجنوبية لأدوار متقدمة في كأس العالم." },
+  { name:"كاكا", country:"البرازيل", flag:"🇧🇷", position:"وسط", born:"1982", clubs:"ميلان، ريال مدريد", story:"آخر لاعب يفوز بالكرة الذهبية قبل هيمنة ميسي ورونالدو (2007). فاز بدوري أبطال أوروبا 2007 مع ميلان. فاز بكأس العالم 2002." },
+  { name:"أندريا بيرلو", country:"إيطاليا", flag:"🇮🇹", position:"وسط", born:"1979", clubs:"ميلان، يوفنتوس", story:"'المعلم'. أحد أفضل لاعبي الوسط في التاريخ. فاز بكأس العالم 2006. فاز بدوري أبطال أوروبا مرتين مع ميلان. قاد يوفنتوس لـ 4 دوري إيطالي متتالي." },
+  { name:"فرانشيسكو توتي", country:"إيطاليا", flag:"🇮🇹", position:"وسط", born:"1976", clubs:"روما", story:"أسطورة روما الخالدة. لعب 25 عاماً مع النادي. فاز بكأس العالم 2006. رفض عروضاً من ريال مدريد ليبقى مع روما." },
+  { name:"جيانلويجي بوفون", country:"إيطاليا", flag:"🇮🇹", position:"حارس", born:"1978", clubs:"بارما، يوفنتوس، باريس", story:"أحد أفضل الحراس في التاريخ. فاز بكأس العالم 2006. فاز بالدوري الإيطالي 10 مرات مع يوفنتوس. وصل لنهائي دوري أبطال أوروبا 3 مرات." },
+  { name:"بافيل نيدفيد", country:"التشيك", flag:"🇨🇿", position:"وسط", born:"1972", clubs:"سبارتا براغ، لاتسيو، يوفنتوس", story:"فاز بالكرة الذهبية 2003. قاد يوفنتوس للعديد من الألقاب. قاد التشيك لنهائي يورو 1996." },
+  { name:"لويس فيغو", country:"البرتغال", flag:"🇵🇹", position:"وسط", born:"1972", clubs:"سبورتنغ، برشلونة، ريال مدريد", story:"فاز بالكرة الذهبية 2000. انتقل من برشلونة إلى ريال مدريد في صفقة مثيرة للجدل. فاز بدوري أبطال أوروبا 2002 مع ريال مدريد." },
+  { name:"رونالد كومان", country:"هولندا", flag:"🇳🇱", position:"مدافع", born:"1963", clubs:"برشلونة", story:"سجّل هدف الفوز في نهائي دوري أبطال أوروبا 1992 مع برشلونة. فاز بالكرة الذهبية 1987." },
+  { name:"دينيس لو", country:"اسكتلندا", flag:"🇬🇧", position:"مهاجم", born:"1940", clubs:"مانشستر يونايتد، مانشستر سيتي", story:"أسطورة مانشستر يونايتد. فاز بالكرة الذهبية 1964. قاد يونايتد للفوز بأول دوري أبطال أوروبا 1968." },
+  { name:"بوبي تشارلتون", country:"إنجلترا", flag:"🇬🇧", position:"وسط", born:"1937", clubs:"مانشستر يونايتد", story:"أسطورة مانشستر يونايتد. نجا من حادثة ميونخ الجوية 1958. فاز بكأس العالم 1966 والكرة الذهبية 1966." },
+  { name:"غاريث بيل", country:"ويلز", flag:"🇬🇧", position:"مهاجم", born:"1989", clubs:"توتنهام، ريال مدريد", story:"قاد ويلز لنصف نهائي يورو 2016. فاز بـ 5 دوري أبطال أوروبا مع ريال مدريد. سجّل هدفاً أسطورياً في نهائي 2018." },
+  { name:"زلاتان إبراهيموفيتش", country:"السويد", flag:"🇸🇪", position:"مهاجم", born:"1981", clubs:"أياكس، يوفنتوس، إنتر، ميلان، باريس، مانشستر", story:"أحد أكثر المهاجمين تأثيراً في جيله. لعب لأكبر أندية أوروبا. فاز بالدوري في 4 دول مختلفة." },
+  { name:"أندري شيفتشينكو", country:"أوكرانيا", flag:"🇺🇦", position:"مهاجم", born:"1976", clubs:"دينامو كييف، ميلان، تشيلسي", story:"فاز بالكرة الذهبية 2004. قاد ميلان للفوز بدوري أبطال أوروبا 2003. هدّاف أوكرانيا التاريخي." },
+  { name:"هنريك لارسون", country:"السويد", flag:"🇸🇪", position:"مهاجم", born:"1971", clubs:"سيلتيك، برشلونة، هلسينغبورغ", story:"أسطورة سيلتيك. فاز بدوري أبطال أوروبا 2006 مع برشلونة. قاد السويد للعديد من البطولات." },
+  { name:"روبي كين", country:"أيرلندا", flag:"🇮🇪", position:"مهاجم", born:"1980", clubs:"توتنهام، ليفربول، لوس أنجلوس غالاكسي", story:"قاد أيرلندا في العديد من البطولات. لعب لتوتنهام وليفربول. يُعرف بشجاعته وروحه القتالية." },
+  { name:"ريان جيجز", country:"ويلز", flag:"🇬🇧", position:"وسط", born:"1973", clubs:"مانشستر يونايتد", story:"أسطورة مانشستر يونايتد. فاز بـ 13 دوري إنجليزي و2 دوري أبطال أوروبا. لعب لأكثر من 20 عاماً مع النادي." },
+  { name:"ديدييه دروغبا", country:"ساحل العاج", flag:"🇨🇮", position:"مهاجم", born:"1978", clubs:"مارسيليا، تشيلسي، غلطة سراي", story:"أسطورة تشيلسي. سجّل هدف التعادل وهدف الفوز في نهائي دوري أبطال أوروبا 2012. فاز بالدوري الإنجليزي 4 مرات." },
+  { name:"صامويل إيتو", country:"الكاميرون", flag:"🇨🇲", position:"مهاجم", born:"1981", clubs:"برشلونة، إنتر، تشيلسي", story:"فاز بدوري أبطال أوروبا 3 مرات (مرتين مع برشلونة وواحدة مع إنتر). فاز بكأس أمم أفريقيا مرتين." },
+  { name:"جورج ويا", country:"ليبيريا", flag:"🇱🇷", position:"مهاجم", born:"1966", clubs:"موناكو، باريس، ميلان، تشيلسي", story:"اللاعب الأفريقي الوحيد الذي فاز بالكرة الذهبية (1995). فاز بدوري أبطال أوروبا 1995 مع ميلان. أصبح رئيساً لليبيريا لاحقاً." },
+  { name:"روجر ميلا", country:"الكاميرون", flag:"🇨🇲", position:"مهاجم", born:"1952", clubs:"كانون ياوندي، مونبلييه", story:"'الأسد العجوز'. سجّل في كأس العالم 1990 و1994 وهو في الأربعينيات. قاد الكاميرون لربع نهائي كأس العالم 1990." },
+  { name:"عبيدي بيليه", country:"غانا", flag:"🇬🇭", position:"وسط", born:"1964", clubs:"مارسيليا، تورينو", story:"أسطورة الكرة الغانية. فاز بالكرة الذهبية الأفريقية 3 مرات. لعب لمارسيليا وتورينو." },
+  { name:"جاي جاي أوكوتشا", country:"نيجيريا", flag:"🇳🇬", position:"وسط", born:"1982", clubs:"باريس، بولتون", story:"أحد أفضل لاعبي الوسط الأفارقة في جيله. قاد نيجيريا للعديد من البطولات. لعب لباريس سان جيرمان. فاز بكأس أمم أفريقيا 2013." },
+  { name:"حسام حسن", country:"مصر", flag:"🇪🇬", position:"مهاجم", born:"1966", clubs:"الأهلي، الزمالك", story:"هدّاف مصر التاريخي. لعب للأهلي والزمالك. قاد مصر للعديد من البطولات." },
+  { name:"أحمد حسن", country:"مصر", flag:"🇪🇬", position:"وسط", born:"1975", clubs:"الأهلي، أندرلخت", story:"قاد مصر للفوز بكأس أمم أفريقيا 4 مرات. لعب للأهلي وأندرلخت. سجّل أكثر من 30 هدفاً دولياً." },
+  { name:"نور الدين نايبت", country:"المغرب", flag:"🇲🇦", position:"مدافع", born:"1970", clubs:"نيم، مارسيليا، ديبورتيفو", story:"'الأسد الأطلسي'. أحد أفضل المدافعين العرب في التاريخ. لعب لمارسيليا وديبورتيفو." },
+  { name:"مصطفى حاجي", country:"المغرب", flag:"🇲🇦", position:"وسط", born:"1971", clubs:"نانت، بنفيكا", story:"أحد أفضل لاعبي الوسط المغاربة. لعب لبنفيكا. قاد المغرب لكأس العالم 1998." },
+  { name:"طارق ذياب", country:"تونس", flag:"🇹🇳", position:"وسط", born:"1959", clubs:"الترجي", story:"أسطورة الترجي التونسي. قاد تونس لكأس العالم 1978. يُعتبر أحد أفضل اللاعبين في تاريخ الكرة التونسية." },
+  { name:"راضي الجعايدي", country:"تونس", flag:"🇹🇳", position:"مدافع", born:"1975", clubs:"الترجي، بولتون", story:"قاد تونس للفوز بكأس أمم أفريقيا 2004. لعب للترجي وبولتون." },
+  { name:"لخضر بلومي", country:"الجزائر", flag:"🇩🇿", position:"مهاجم", born:"1955", clubs:"الجزائر، غرونوبل", story:"قاد الجزائر للفوز بكأس أمم أفريقيا 1990. سجّل في كأس العالم 1982." },
+  { name:"جاسم يعقوب", country:"الكويت", flag:"🇰🇼", position:"مهاجم", born:"1953", clubs:"القادسية", story:"أسطورة الكرة الكويتية. قاد الكويت للفوز بكأس آسيا 1980. هدّاف المنتخب الكويتي التاريخي." },
+  { name:"محمود الخطيب", country:"مصر", flag:"🇪🇬", position:"مهاجم", born:"1954", clubs:"الأهلي", story:"'بيبو'. أسطورة الأهلي. فاز بدوري أبطال أفريقيا مرتين. قاد مصر للفوز بكأس أمم أفريقيا 1986." },
+  { name:"حسن شحاتة", country:"مصر", flag:"🇪🇬", position:"وسط", born:"1947", clubs:"الأهلي", story:"'المعلم'. قاد مصر للفوز بكأس أمم أفريقيا 3 مرات متتالية كمدرب. لعب للأهلي." },
+  { name:"بيبي", country:"البرتغال", flag:"🇵🇹", position:"مدافع", born:"1983", clubs:"ريال مدريد، بورتو", story:"أحد أفضل المدافعين في جيله. فاز بـ 3 دوري أبطال أوروبا مع ريال مدريد. فاز بيورو 2016 مع البرتغال." },
+  { name:"داني ألفيش", country:"البرازيل", flag:"🇧🇷", position:"مدافع", born:"1983", clubs:"إشبيلية، برشلونة، يوفنتوس", story:"أكثر لاعب فوزاً بالألقاب في تاريخ كرة القدم. فاز بـ 3 دوري أبطال أوروبا مع برشلونة." },
+  { name:"مارسيلو", country:"البرازيل", flag:"🇧🇷", position:"مدافع", born:"1988", clubs:"ريال مدريد", story:"أسطورة ريال مدريد. فاز بـ 5 دوري أبطال أوروبا و6 دوري إسباني. لعب أكثر من 15 عاماً مع ريال مدريد." },
+  { name:"روبرتو كارلوس", country:"البرازيل", flag:"🇧🇷", position:"مدافع", born:"1973", clubs:"ريال مدريد، فنربخشة", story:"أحد أفضل الأظهرة اليسرى في التاريخ. فاز بـ 3 دوري أبطال أوروبا مع ريال مدريد. فاز بكأس العالم 2002." },
+  { name:"كافو", country:"البرازيل", flag:"🇧🇷", position:"مدافع", born:"1970", clubs:"ميلان، روما", story:"اللاعب الوحيد الذي لعب في 3 نهائيات كأس عالم متتالية. فاز بكأس العالم 1994 و2002. فاز بدوري أبطال أوروبا 2007 مع ميلان." },
+  { name:"زيكو", country:"البرازيل", flag:"🇧🇷", position:"وسط", born:"1953", clubs:"فلامنغو، أودينيزي", story:"أحد أفضل لاعبي الوسط في تاريخ البرازيل. لعب لفلومينينسي وأودينيزي. قاد البرازيل في كأس العالم 1982." },
+  { name:"روماريو", country:"البرازيل", flag:"🇧🇷", position:"مهاجم", born:"1966", clubs:"PSV، برشلونة", story:"قاد البرازيل للفوز بكأس العالم 1994. فاز بالكرة الذهبية 1994. لعب لبرشلونة وPSV." },
+  { name:"بيبيتو", country:"البرازيل", flag:"🇧🇷", position:"مهاجم", born:"1964", clubs:"فاسكو دا غاما، ديبورتيفو", story:"قاد البرازيل للفوز بكأس العالم 1994. لعب لديبورتيفو." },
+  { name:"كارلوس فالديراما", country:"كولومبيا", flag:"🇨🇴", position:"وسط", born:"1961", clubs:"مونبلييه، تامبا باي", story:"'إل بينو'. أحد أفضل لاعبي الوسط في تاريخ أمريكا الجنوبية. قاد كولومبيا في التسعينيات." },
+  { name:"رينيه هيغيتا", country:"كولومبيا", flag:"🇨🇴", position:"حارس", born:"1966", clubs:"أتلتيكو ناسيونال", story:"'إل لوكو'. أحد أفضل الحراس في تاريخ أمريكا الجنوبية. قاد كولومبيا في التسعينيات." },
+  { name:"إيفان زامورانو", country:"تشيلي", flag:"🇨🇱", position:"مهاجم", born:"1967", clubs:"إشبيلية، ريال مدريد، إنتر", story:"أحد أفضل المهاجمين في التسعينيات. لعب لريال مدريد وإنتر. فاز بالدوري الإسباني مع ريال مدريد." },
+  { name:"أليكسيس سانشيز", country:"تشيلي", flag:"🇨🇱", position:"مهاجم", born:"1988", clubs:"أودينيزي، برشلونة، أرسنال", story:"قاد تشيلي للفوز بكوبا أمريكا مرتين (2015، 2016). لعب لبرشلونة وأرسنال." },
+  { name:"دييغو فورلان", country:"أوروغواي", flag:"🇺🇾", position:"مهاجم", born:"1979", clubs:"فياريال، أتلتيكو مدريد", story:"فاز بالحذاء الذهبي الأوروبي مرتين. قاد أوروغواي للفوز بكوبا أمريكا 2011. فاز بجائزة أفضل لاعب في كأس العالم 2010." },
+  { name:"إنزو فرانسيسكولي", country:"أوروغواي", flag:"🇺🇾", position:"وسط", born:"1961", clubs:"مارسيليا", story:"'إل برينسيبي'. أحد أفضل لاعبي الوسط في تاريخ أوروغواي. قاد أوروغواي للفوز بكوبا أمريكا 1983 و1987." },
+  { name:"خوسيه لويس تشيلافيرت", country:"باراغواي", flag:"🇵🇾", position:"مدافع", born:"1965", clubs:"أتلتيكو مدريد، تشيلسي", story:"أحد أفضل المدافعين في تاريخ أمريكا الجنوبية. لعب لأتلتيكو مدريد وتشيلسي. يُعرف بأهدافه من الركلات الثابتة." },
+  { name:"هوغو سانشيز", country:"المكسيك", flag:"🇲🇽", position:"مهاجم", born:"1958", clubs:"أونام، ريال مدريد", story:"'هوغول'. أسطورة الكرة المكسيكية. لعب لريال مدريد. سجّل أكثر من 500 هدف في مسيرته." },
+  { name:"رافائيل ماركيز", country:"المكسيك", flag:"🇲🇽", position:"مدافع", born:"1979", clubs:"موناكو، برشلونة", story:"قاد المكسيك في 5 كؤوس عالم. فاز بدوري أبطال أوروبا مرتين مع برشلونة." },
+  { name:"كلينت ديمبسي", country:"الولايات المتحدة", flag:"🇺🇸", position:"مهاجم", born:"1983", clubs:"فولهام، توتنهام", story:"أحد أفضل اللاعبين الأمريكيين في التاريخ. لعب لفولهام وتوتنهام. قاد الولايات المتحدة في 3 كؤوس عالم." },
+  { name:"لاندون دونوفان", country:"الولايات المتحدة", flag:"🇺🇸", position:"مهاجم", born:"1982", clubs:"ليفركوزن، لوس أنجلوس غالاكسي", story:"هدّاف الولايات المتحدة التاريخي. لعب لليفركوزن ولوس أنجلوس غالاكسي." },
+  { name:"تيم هاوارد", country:"الولايات المتحدة", flag:"🇺🇸", position:"حارس", born:"1979", clubs:"مانشستر يونايتد، إيفرتون", story:"أحد أفضل الحراس الأمريكيين في التاريخ. لعب لإيفرتون ومانشستر يونايتد. قاد الولايات المتحدة في كأس العالم 2010." },
+  { name:"ريفالدو", country:"البرازيل", flag:"🇧🇷", position:"وسط", born:"1972", clubs:"ديبورتيفو، برشلونة، ميلان", story:"فاز بالكرة الذهبية 1999. قاد البرازيل للفوز بكأس العالم 2002. سجّل هدفاً أسطورياً في كأس العالم 2002." },
+  { name:"أدريانو", country:"البرازيل", flag:"🇧🇷", position:"مهاجم", born:"1982", clubs:"إنتر، روما", story:"أحد أفضل المهاجمين في جيله في ذروته. لعب لإنتر وروما. قاد البرازيل للفوز بكوبا أمريكا 2004." },
+  { name:"روبي فاولر", country:"إنجلترا", flag:"🇬🇧", position:"مهاجم", born:"1975", clubs:"ليفربول، ليدز", story:"أسطورة ليفربول. سجّل أكثر من 180 هدفاً للنادي. يُعتبر أحد أفضل المهاجمين في تاريخ الدوري الإنجليزي." },
+  { name:"مايكل أوين", country:"إنجلترا", flag:"🇬🇧", position:"مهاجم", born:"1979", clubs:"ليفربول، ريال مدريد", story:"فاز بالكرة الذهبية 2001. لعب لليفربول وريال مدريد. سجّل أكثر من 150 هدفاً لليفربول." },
+  { name:"واين روني", country:"إنجلترا", flag:"🇬🇧", position:"مهاجم", born:"1985", clubs:"إيفرتون، مانشستر يونايتد", story:"هدّاف مانشستر يونايتد التاريخي. فاز بـ 5 دوري إنجليزي ودوري أبطال أوروبا 2008." },
+  { name:"ستيفن جيرارد", country:"إنجلترا", flag:"🇬🇧", position:"وسط", born:"1980", clubs:"ليفربول، لوس أنجلوس غالاكسي", story:"أسطورة ليفربول. قاد الفريق للفوز بدوري أبطال أوروبا 2005. لعب أكثر من 700 مباراة مع النادي." },
+  { name:"فرانك لامبارد", country:"إنجلترا", flag:"🇬🇧", position:"وسط", born:"1978", clubs:"تشيلسي، مانشستر سيتي", story:"هدّاف تشيلسي التاريخي. فاز بدوري أبطال أوروبا 2012. فاز بالدوري الإنجليزي 3 مرات." },
+  { name:"بول سكولز", country:"إنجلترا", flag:"🇬🇧", position:"وسط", born:"1974", clubs:"مانشستر يونايتد", story:"أسطورة مانشستر يونايتد. فاز بـ 11 دوري إنجليزي و2 دوري أبطال أوروبا. يُعرف بتمريراته الدقيقة." },
+  { name:"ريو فرديناند", country:"إنجلترا", flag:"🇬🇧", position:"مدافع", born:"1978", clubs:"ليدز، مانشستر يونايتد", story:"أحد أفضل المدافعين في تاريخ الدوري الإنجليزي. فاز بـ 6 دوري إنجليزي ودوري أبطال أوروبا 2008." },
+  { name:"جون تيري", country:"إنجلترا", flag:"🇬🇧", position:"مدافع", born:"1980", clubs:"تشيلسي", story:"أسطورة تشيلسي. فاز بـ 5 دوري إنجليزي ودوري أبطال أوروبا 2012. قاد تشيلسي لأكثر من عقد." },
+  { name:"آشلي كول", country:"إنجلترا", flag:"🇬🇧", position:"مدافع", born:"1980", clubs:"أرسنال، تشيلسي", story:"أحد أفضل الأظهرة اليسرى في تاريخ الدوري الإنجليزي. فاز بدوري أبطال أوروبا 2012 مع تشيلسي." },
+  { name:"ديفيد بيكهام", country:"إنجلترا", flag:"🇬🇧", position:"وسط", born:"1975", clubs:"مانشستر يونايتد، ريال مدريد، ميلان", story:"أحد أشهر اللاعبين في التاريخ. فاز بدوري أبطال أوروبا 1999 مع مانشستر يونايتد. لعب لريال مدريد وميلان." },
+  { name:"بول جاسكوين", country:"إنجلترا", flag:"🇬🇧", position:"وسط", born:"1967", clubs:"نيوكاسل، توتنهام", story:"أحد أكثر اللاعبين موهبة في تاريخ إنجلترا. قاد إنجلترا لنصف نهائي كأس العالم 1990." },
+  { name:"بيتر شيلتون", country:"إنجلترا", flag:"🇬🇧", position:"حارس", born:"1949", clubs:"نوتنغهام فورست، ديربي", story:"أكثر لاعب مشاركة مع إنجلترا (125 مباراة). فاز بدوري أبطال أوروبا مرتين مع نوتنغهام فورست." },
+  { name:"جوردون بانكس", country:"إنجلترا", flag:"🇬🇧", position:"حارس", born:"1937", clubs:"ليستر سيتي، ستوك سيتي", story:"فاز بكأس العالم 1966. يُعرف بتصديه الأسطوري لهدف بيليه في كأس العالم 1970." },
+  { name:"بوبي مور", country:"إنجلترا", flag:"🇬🇧", position:"مدافع", born:"1941", clubs:"وست هام", story:"قاد إنجلترا للفوز بكأس العالم 1966. أسطورة وست هام. مثّل إنجلترا 108 مرات." },
+  { name:"ستانلي ماثيوز", country:"إنجلترا", flag:"🇬🇧", position:"وسط", born:"1915", clubs:"ستوك سيتي، بلاكبول", story:"أول لاعب يفوز بالكرة الذهبية (1956). لعب حتى سن 50. يُعتبر أحد أعظم اللاعبين في تاريخ إنجلترا." }
+];
+
+/* ===== حالة التطبيق ===== */
+const state = {
+  search: '',
+  country: '',
+  position: '',
+  sort: 'default',
+  onlyFavs: false
+};
+
+let favorites = JSON.parse(localStorage.getItem(FAV_KEY) || '[]');
+let currentModalPlayer = null;
+
+/* ===== تهيئة ===== */
+function init() {
+  // الوضع الليلي
+  const savedTheme = localStorage.getItem(THEME_KEY) || 'dark';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+  document.getElementById('themeBtn').textContent = savedTheme === 'dark' ? '🌙' : '☀️';
+
+  // إحصائيات
+  document.getElementById('statPlayers').textContent = players.length;
+  const countries = new Set(players.map(p => p.country));
+  document.getElementById('statCountries').textContent = countries.size;
+
+  // ملء فلتر الدول
+  const countrySelect = document.getElementById('countryFilter');
+  [...countries].sort().forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c; opt.textContent = c;
+    countrySelect.appendChild(opt);
+  });
+
+  render();
+
+  // ربط الأحداث
+  bindEvents();
+}
+
+/* ===== الفلترة والترتيب ===== */
+function getFilteredPlayers() {
+  let list = [...players];
+
+  if (state.search) {
+    const q = state.search.toLowerCase();
+    list = list.filter(p =>
+      p.name.toLowerCase().includes(q) ||
+      p.country.toLowerCase().includes(q) ||
+      p.position.toLowerCase().includes(q) ||
+      p.clubs.toLowerCase().includes(q)
+    );
+  }
+
+  if (state.country) list = list.filter(p => p.country === state.country);
+  if (state.position) list = list.filter(p => p.position === state.position);
+  if (state.onlyFavs) list = list.filter(p => favorites.includes(p.name));
+
+  switch (state.sort) {
+    case 'name-asc': list.sort((a,b) => a.name.localeCompare(b.name, 'ar')); break;
+    case 'name-desc': list.sort((a,b) => b.name.localeCompare(a.name, 'ar')); break;
+    case 'year-asc': list.sort((a,b) => +a.born - +b.born); break;
+    case 'year-desc': list.sort((a,b) => +b.born - +a.born); break;
+  }
+
+  return list;
+}
+
+/* ===== العرض ===== */
+function render() {
+  const list = getFilteredPlayers();
+  const grid = document.getElementById('playersGrid');
+  grid.innerHTML = '';
+
+  document.getElementById('countShown').textContent = list.length;
+  document.getElementById('statShowing').textContent = list.length;
+  document.getElementById('resetBtn').classList.toggle('show',
+    !!(state.search || state.country || state.position || state.onlyFavs || state.sort !== 'default'));
+
+  if (list.length === 0) {
+    grid.innerHTML = `<div class="no-results"><span>🔍</span>لا يوجد لاعب مطابق... جرّب تغيير الفلاتر</div>`;
+    return;
+  }
+
+  list.forEach((p, i) => {
+    const card = document.createElement('div');
+    card.className = 'player-card';
+    card.style.animationDelay = `${Math.min(i * 0.025, 1.2)}s`;
+    const isFav = favorites.includes(p.name);
+
+    card.innerHTML = `
+      <div class="flag-badge">${p.flag}</div>
+      <button class="fav-btn ${isFav ? 'active' : ''}" title="إضافة للمفضلة">${isFav ? '❤️' : '🤍'}</button>
+      <div class="img-wrap">
+        <img src="${FALLBACK}" alt="${p.name}" loading="lazy" data-name="${p.name}">
+      </div>
+      <div class="card-info">
+        <h3>${p.name}</h3>
+        <div class="position">⚽ ${p.position}</div>
+        <div class="details">
+          <span>🌍 ${p.country}</span>
+          <span>📅 ${p.born}</span>
+        </div>
+      </div>
+    `;
+
+    // زر المفضلة
+    card.querySelector('.fav-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleFavorite(p.name);
+      render();
+    });
+
+    // فتح النافذة
+    card.addEventListener('click', () => openModal(p));
+
+    grid.appendChild(card);
+
+    // جلب الصورة
+    loadImageFor(p.name, card.querySelector('img'));
+  });
+}
+
+/* ===== تحميل الصور بشكل غير متزامن ===== */
+async function loadImageFor(name, imgEl) {
+  const url = await fetchPlayerImage(name);
+  if (url && imgEl) {
+    imgEl.src = url;
+    imgEl.onerror = () => { imgEl.src = FALLBACK; };
+  }
+}
+
+/* ===== المفضلة ===== */
+function toggleFavorite(name) {
+  const idx = favorites.indexOf(name);
+  if (idx >= 0) favorites.splice(idx, 1);
+  else favorites.push(name);
+  localStorage.setItem(FAV_KEY, JSON.stringify(favorites));
+}
+
+/* ===== فتح النافذة ===== */
+async function openModal(p) {
+  currentModalPlayer = p;
+  const img = document.getElementById('modalImage');
+  img.src = FALLBACK;
+
+  document.getElementById('modalName').textContent = p.name;
+  document.getElementById('modalTags').innerHTML = `
+    <span>${p.flag} ${p.country}</span>
+    <span>⚽ ${p.position}</span>
+    <span>📅 ${p.born}</span>
+  `;
+  document.getElementById('modalStory').textContent = p.story;
+
+  const modal = document.getElementById('playerModal');
+  modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+
+  const url = await fetchPlayerImage(p.name);
+  if (url) img.src = url;
+  img.onerror = () => { img.src = FALLBACK; };
+}
+
+function closeModal() {
+  document.getElementById('playerModal').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+/* ===== ربط الأحداث ===== */
+function bindEvents() {
+  // البحث
+  const searchInput = document.getElementById('searchInput');
+  const clearSearch = document.getElementById('clearSearch');
+  let searchTimer;
+  searchInput.addEventListener('input', e => {
+    clearTimeout(searchTimer);
+    state.search = e.target.value.trim();
+    clearSearch.classList.toggle('show', !!state.search);
+    searchTimer = setTimeout(render, 200);
+  });
+  clearSearch.addEventListener('click', () => {
+    searchInput.value = '';
+    state.search = '';
+    clearSearch.classList.remove('show');
+    render();
+  });
+
+  // الفلاتر
+  document.getElementById('countryFilter').addEventListener('change', e => {
+    state.country = e.target.value; render();
+  });
+  document.getElementById('positionFilter').addEventListener('change', e => {
+    state.position = e.target.value; render();
+  });
+  document.getElementById('sortFilter').addEventListener('change', e => {
+    state.sort = e.target.value; render();
+  });
+  document.getElementById('favFilter').addEventListener('click', (e) => {
+    state.onlyFavs = !state.onlyFavs;
+    e.currentTarget.classList.toggle('active', state.onlyFavs);
+    render();
+  });
+
+  // إعادة تعيين
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    state.search = ''; state.country = ''; state.position = '';
+    state.sort = 'default'; state.onlyFavs = false;
+    searchInput.value = '';
+    clearSearch.classList.remove('show');
+    document.getElementById('countryFilter').value = '';
+    document.getElementById('positionFilter').value = '';
+    document.getElementById('sortFilter').value = 'default';
+    document.getElementById('favFilter').classList.remove('active');
+    render();
+  });
+
+  // النافذة
+  document.getElementById('closeModal').addEventListener('click', closeModal);
+  document.getElementById('playerModal').addEventListener('click', e => {
+    if (e.target.id === 'playerModal') closeModal();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+    if (e.key === '/' && document.activeElement !== searchInput) {
+      e.preventDefault(); searchInput.focus();
+    }
+  });
+
+  // الوضع الليلي
+  document.getElementById('themeBtn').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem(THEME_KEY, next);
+    document.getElementById('themeBtn').textContent = next === 'dark' ? '🌙' : '☀️';
+  });
+
+  // لاعب عشوائي
+  document.getElementById('randomBtn').addEventListener('click', () => {
+    const p = players[Math.floor(Math.random() * players.length)];
+    openModal(p);
+  });
+
+  // زر العودة
+  document.getElementById('toTop').addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+  window.addEventListener('scroll', () => {
+    const scrollTop = document.documentElement.scrollTop;
+    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    document.getElementById('progressBar').style.width = (scrollTop / height) * 100 + '%';
+    document.getElementById('toTop').classList.toggle('show', scrollTop > 400);
+  });
+}
+
+/* ===== بدء التشغيل ===== */
+init();
+</script>
+
+</body>
+    </html>
